@@ -9,9 +9,9 @@
 
 ---
 
-## Current Status: Partially Functional
+## Current Status: Locally Functional
 
-**Last Updated:** October 23, 2025
+**Last Updated:** October 23, 2025 (Evening)
 
 ### ✅ What's Working
 
@@ -31,6 +31,10 @@
 - ✅ **Vercel Deployment** - App deployed (but environment variables may need verification)
 - ✅ **Google Cloud OAuth** - Credentials configured for both local and production
 
+#### MCP Client Integration
+- ✅ **Cursor MCP Config** - Fixed port (3000) and added OAuth Bearer token authentication
+- ✅ **Tools Discovery** - MCP endpoint successfully returns `add_numbers` tool via `tools/list`
+
 ### ❌ What's Not Working / Needs Testing
 
 #### Production Deployment
@@ -39,10 +43,9 @@
 - ❌ **Test Page Interactive Features** - `/test` page buttons not responding (likely React hydration issue)
 
 #### MCP Client Connections
-- ❓ **Cursor Integration** - Config file created (`~/.cursor/mcp.json`) but points to port 3001 (should be 3000)
+- ✅ **Cursor Integration** - Fully working! Tools showing up and executing correctly
 - ❌ **Claude Desktop** - Not tested
 - ❌ **VSCode** - Not tested
-- ❌ **MCP Inspector** - Installation failed due to npm permission issues
 
 ---
 
@@ -109,11 +112,10 @@ Currently implemented:
 
 ### High Priority
 1. **Production OAuth Flow Not Verified** - Need end-to-end test on Vercel deployment
-2. **Cursor MCP Config Port Mismatch** - Points to 3001, server runs on 3000
+2. **Access Token Expiry** - Token expires in 1 hour, no refresh mechanism yet
 
 ### Medium Priority
 3. **Test Page Interactive Features** - React client-side JS not working
-4. **MCP Client Testing** - Haven't verified connections from actual MCP clients beyond config
 
 ### Low Priority
 5. **Redis Not Configured** - Optional but could improve performance
@@ -124,6 +126,8 @@ Currently implemented:
 ## Recent Changes
 
 ### October 23, 2025
+
+#### Morning/Afternoon
 - ✅ Fixed Prisma build issue for Vercel deployment (added postinstall script)
 - ✅ Connected local repository to GitHub remote
 - ✅ Set up Neon PostgreSQL database via Vercel
@@ -136,15 +140,34 @@ Currently implemented:
 - ✅ Added Google OAuth redirect URI for production
 - ✅ Deployed to Vercel with environment variables
 
+#### Evening
+- ✅ **Fixed Cursor MCP Integration** - Updated `~/.cursor/mcp.json`:
+  - Changed port from 3001 to 3000
+  - Added OAuth Bearer token authentication
+  - Registered new OAuth client for Cursor
+  - Completed full OAuth flow (authorization → token exchange)
+  - Verified MCP endpoint returns tools correctly
+- ✅ **End-to-End Local Testing** - Full flow working:
+  1. Client registration → client_id/secret
+  2. Authorization URL → Google sign-in
+  3. Code exchange → Bearer token
+  4. MCP tools/list → `add_numbers` tool returned
+- ✅ **Cursor MCP Integration Verified** - After restart, Cursor successfully:
+  - Connected to MCP server (green indicator)
+  - Discovered and displayed `add_numbers` tool
+  - Successfully executed tool call (42 + 17 = 59)
+
 ---
 
 ## Next Steps
 
 ### Immediate Tasks
-1. [ ] Update Cursor MCP config to use port 3000
-2. [ ] Test complete OAuth flow on production (Vercel)
-3. [ ] Verify Cursor can actually call MCP tools
-4. [ ] Fix interactive test page button functionality
+1. [✅] Update Cursor MCP config to use port 3000 - DONE
+2. [✅] Complete OAuth flow for Cursor - DONE
+3. [✅] Restart Cursor and verify tools show up in UI - DONE (green, working!)
+4. [✅] Test calling `add_numbers` tool from Cursor - DONE (42 + 17 = 59)
+5. [ ] Test complete OAuth flow on production (Vercel)
+6. [ ] Fix interactive test page button functionality
 
 ### Future Enhancements
 1. [ ] Add more useful MCP tools beyond `add_numbers`
