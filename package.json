@@ -15,12 +15,14 @@
     "@modelcontextprotocol/sdk": "^1.13.1",
     "@prisma/client": "^6.10.1",
     "@vercel/mcp-adapter": "^0.11.1",
+    "bufferutil": "^4.0.9",
     "crypto": "^1.0.1",
     "next": "15.3.4",
     "next-auth": "^5.0.0-beta.28",
     "prisma": "^6.10.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "utf-8-validate": "^6.0.5",
     "ws": "^8.18.3"
   },
   "devDependencies": {

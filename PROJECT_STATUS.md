@@ -9,9 +9,9 @@
 
 ---
 
-## Current Status: Home Assistant Integration Complete
+## Current Status: Home Assistant Integration Complete & MCP Fully Operational
 
-**Last Updated:** October 24, 2025 (Late Evening)
+**Last Updated:** October 24, 2025 (11:30 PM)
 
 ### ✅ What's Working
 
@@ -36,13 +36,17 @@
 
 #### MCP Client Integration
 - ✅ **Cursor MCP Config** - Fixed port (3000) and added OAuth Bearer token authentication
-- ✅ **Tools Discovery** - MCP endpoint successfully returns `add_numbers` tool via `tools/list`
+- ✅ **Tools Discovery** - MCP endpoint successfully returns all 14 tools via `tools/list`
+- ✅ **OAuth Token Refreshed** - New token issued Oct 24, 2025 (expires in 1 hour)
 
 ### ❌ What's Not Working / Needs Testing
 
 #### Home Assistant Integration (NEW)
-- ❓ **HA MCP Tools** - Tools implemented but need end-to-end testing with real HA instance
-- ❓ **HA Encryption Key** - Needs to be added to `.env.local` and Vercel environment
+- ✅ **HA MCP Tools** - FULLY WORKING! Successfully tested with real HA instance
+- ✅ **HA Encryption Key** - Added to `.env.local` and working correctly
+- ✅ **WebSocket Connection** - Successfully connecting and authenticating
+- ✅ **Tool Execution** - `ha_get_states` tested and returning full entity data
+- ✅ **Native Dependencies** - Installed `bufferutil` and `utf-8-validate` for ws package
 - ❓ **WebSocket Connection Pool** - Connection reuse logic needs testing under load
 - ❓ **Event Subscriptions** - Subscribe tools implemented but need testing
 
@@ -52,7 +56,8 @@
 - ❌ **Test Page Interactive Features** - `/test` page buttons not responding (likely React hydration issue)
 
 #### MCP Client Connections
-- ✅ **Cursor Integration** - Fully working! Tools showing up and executing correctly
+- ✅ **Cursor Integration** - Fully working! Connected, authenticated, and tools loading correctly
+  - ⚠️ **Note:** OAuth tokens expire after 1 hour - see `refresh-mcp-token.md` for refresh instructions
 - ❌ **Claude Desktop** - Not tested
 - ❌ **VSCode** - Not tested
 
@@ -149,15 +154,16 @@ GOOGLE_CLIENT_SECRET=<client-secret>
 ## Known Issues
 
 ### Critical
-- **HA Encryption Key Missing** - Must add `HA_ENCRYPTION_KEY` to `.env.local` before HA tools will work
-  - Generated key: `c7ec564fe3a5f2c41dae6892b4e65220ea1475096f755838049db15c7b07d5af`
-  - Add to `.env.local`: `HA_ENCRYPTION_KEY="c7ec564fe3a5f2c41dae6892b4e65220ea1475096f755838049db15c7b07d5af"`
-  - Also needs to be added to Vercel environment variables for production
+- **RESOLVED: HA Encryption Key** - ✅ Added to `.env.local` and working
+- **RESOLVED: WebSocket Dependencies** - ✅ Installed `bufferutil` and `utf-8-validate` packages
 
 ### High Priority
-1. **HA Tools Not Tested** - Home Assistant integration code complete but needs real-world testing
+1. **RESOLVED: HA Tools Tested** - ✅ Successfully tested with real HA instance, retrieving 27+ light entities
 2. **Production OAuth Flow Not Verified** - Need end-to-end test on Vercel deployment
+3. **Production HA Dependencies** - Need to add `bufferutil` and `utf-8-validate` to production deployment
 3. **Access Token Expiry** - Token expires in 1 hour, no refresh mechanism yet
+   - Current workaround: Follow steps in `refresh-mcp-token.md` to get new token
+   - Future improvement: Implement OAuth refresh token flow
 
 ### Medium Priority
 4. **Test Page Interactive Features** - React client-side JS not working
@@ -248,11 +254,12 @@ GOOGLE_CLIENT_SECRET=<client-secret>
 3. [✅] Restart Cursor and verify tools show up in UI - DONE (green, working!)
 4. [✅] Test calling `add_numbers` tool from Cursor - DONE (42 + 17 = 59)
 5. [✅] Implement Home Assistant integration - DONE (13 tools + UI)
-6. [ ] **Add `HA_ENCRYPTION_KEY` to `.env.local`** - Required for HA integration
-7. [ ] Test HA tools with real Home Assistant instance
-8. [ ] Test complete OAuth flow on production (Vercel)
-9. [ ] Add `HA_ENCRYPTION_KEY` to Vercel environment variables
-10. [ ] Fix interactive test page button functionality
+6. [✅] Refresh OAuth token (Oct 24, 2025) - DONE - Token expires in 1 hour
+7. [ ] **Add `HA_ENCRYPTION_KEY` to `.env.local`** - Required for HA integration
+8. [ ] Test HA tools with real Home Assistant instance
+9. [ ] Test complete OAuth flow on production (Vercel)
+10. [ ] Add `HA_ENCRYPTION_KEY` to Vercel environment variables
+11. [ ] Fix interactive test page button functionality
 
 ### Future Enhancements
 1. [ ] Test Claude Desktop integration
