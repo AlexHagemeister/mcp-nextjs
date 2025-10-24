@@ -6,7 +6,22 @@
 2. This MCP server running locally or on Vercel
 3. Valid OAuth token from the MCP server
 
-## Step 1: Add Encryption Key to Environment
+## Step 1: Install WebSocket Native Dependencies
+
+The Home Assistant integration uses WebSocket connections via the `ws` package, which requires native modules for optimal performance.
+
+```bash
+# Install or rebuild native dependencies
+npm install
+npm rebuild bufferutil utf-8-validate
+
+# Restart the dev server
+npm run dev
+```
+
+**Note:** If you see `[TypeError: bufferUtil.mask is not a function]` errors, you need to rebuild the native modules.
+
+## Step 2: Add Encryption Key to Environment
 
 The Home Assistant integration encrypts your HA tokens at rest using AES-256-GCM encryption.
 
@@ -34,7 +49,7 @@ vercel env add HA_ENCRYPTION_KEY
 
 After adding, redeploy your Vercel project.
 
-## Step 2: Create Home Assistant Long-Lived Access Token
+## Step 3: Create Home Assistant Long-Lived Access Token
 
 1. Open your Home Assistant instance
 2. Click your profile (bottom left)
@@ -43,7 +58,7 @@ After adding, redeploy your Vercel project.
 5. Give it a name (e.g., "MCP Server")
 6. Copy the token (you won't be able to see it again!)
 
-## Step 3: Configure MCP Server
+## Step 4: Configure MCP Server
 
 ### Via Web UI
 
@@ -68,7 +83,7 @@ curl -X POST http://localhost:3000/api/ha/config \
   }'
 ```
 
-## Step 4: Test with MCP Client (Cursor)
+## Step 5: Test with MCP Client (Cursor)
 
 1. Make sure you have valid OAuth credentials for your MCP client
 2. In Cursor, the Home Assistant tools should now be available
@@ -144,26 +159,56 @@ curl -X POST http://localhost:3000/api/ha/config \
 
 ## Troubleshooting
 
+### "[TypeError: bufferUtil.mask is not a function]" or WebSocket Connection Errors
+
+**Symptom:** Server logs show `TypeError: bufferUtil.mask is not a function` and WebSocket connections timeout.
+
+**Cause:** The native `bufferutil` module is not properly compiled for your system.
+
+**Solution:**
+```bash
+# Rebuild native modules
+npm rebuild bufferutil utf-8-validate
+
+# Kill any running dev servers
+lsof -ti:3000 | xargs kill -9
+
+# Restart the server
+npm run dev
+```
+
+**For Production (Vercel):**
+- The native modules should build automatically during deployment
+- If issues persist, check Vercel build logs for compilation errors
+- Ensure both `bufferutil` and `utf-8-validate` are in `dependencies` (not `devDependencies`)
+
 ### "HA_ENCRYPTION_KEY environment variable is not set"
 - You forgot to add the encryption key to your environment
 - Make sure to restart your server after adding it to `.env.local`
+- For local development: Create `.env.local` file with the key
+- For production: Add to Vercel environment variables
 
 ### "Home Assistant not configured"
 - Sign in to the web UI and configure your HA credentials at `/ha`
+- Make sure you've completed Step 4 (Configure MCP Server)
 
 ### "Connection failed: Authentication failed"
 - Your Home Assistant token is invalid or expired
 - Create a new long-lived access token in Home Assistant
+- Delete and re-enter your credentials at `/ha`
 
 ### "Connection timeout"
 - Your Home Assistant instance is not reachable from the MCP server
 - Check your firewall settings
 - Make sure the URL is correct (including http:// or https://)
+- Verify Home Assistant is running and accessible from your network
+- Try accessing the HA URL directly in a browser from the same machine
 
 ### Tools return "Error: Home Assistant not configured"
 - Your HA credentials are not saved yet
 - Or the OAuth token you're using doesn't belong to a user with HA config
 - Each user must configure their own Home Assistant credentials
+- Visit `/ha` while signed in to configure
 
 ## Security Notes
 

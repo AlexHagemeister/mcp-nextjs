@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(node test-ha-websocket.js:*)",
+      "Read(//var/folders/7q/j6fbl32j13n1dg03tz5cycyc0000gp/T/TemporaryItems/NSIRD_screencaptureui_sxrcsz/**)",
+      "Bash(node test-lamp-off.js:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -11,7 +11,7 @@
 
 ## Current Status: Home Assistant Integration Complete & MCP Fully Operational
 
-**Last Updated:** October 24, 2025 (11:30 PM)
+**Last Updated:** October 24, 2025 (1:40 AM)
 
 ### ✅ What's Working
 
@@ -41,12 +41,14 @@
 
 ### ❌ What's Not Working / Needs Testing
 
-#### Home Assistant Integration (NEW)
+#### Home Assistant Integration
 - ✅ **HA MCP Tools** - FULLY WORKING! Successfully tested with real HA instance
 - ✅ **HA Encryption Key** - Added to `.env.local` and working correctly
 - ✅ **WebSocket Connection** - Successfully connecting and authenticating
-- ✅ **Tool Execution** - `ha_get_states` tested and returning full entity data
-- ✅ **Native Dependencies** - Installed `bufferutil` and `utf-8-validate` for ws package
+- ✅ **Tool Execution** - `ha_turn_on`, `ha_get_states`, and other tools tested successfully
+- ✅ **Native Dependencies** - `bufferutil` and `utf-8-validate` properly compiled and working
+- ✅ **WebSocket Native Module Fix** - Resolved `bufferUtil.mask is not a function` error
+- ✅ **Light Control** - Successfully turned on `light.9_kitchen_shelf_lamp` via MCP
 - ❓ **WebSocket Connection Pool** - Connection reuse logic needs testing under load
 - ❓ **Event Subscriptions** - Subscribe tools implemented but need testing
 
@@ -156,11 +158,14 @@ GOOGLE_CLIENT_SECRET=<client-secret>
 ### Critical
 - **RESOLVED: HA Encryption Key** - ✅ Added to `.env.local` and working
 - **RESOLVED: WebSocket Dependencies** - ✅ Installed `bufferutil` and `utf-8-validate` packages
+- **RESOLVED: WebSocket Native Module Error** - ✅ Fixed `bufferUtil.mask is not a function` via `npm rebuild`
 
 ### High Priority
-1. **RESOLVED: HA Tools Tested** - ✅ Successfully tested with real HA instance, retrieving 27+ light entities
+1. **RESOLVED: HA Tools Tested** - ✅ Successfully tested with real HA instance
+   - ✅ Light control verified (`light.9_kitchen_shelf_lamp` turned on successfully)
+   - ✅ WebSocket authentication working
+   - ✅ Native modules properly compiled
 2. **Production OAuth Flow Not Verified** - Need end-to-end test on Vercel deployment
-3. **Production HA Dependencies** - Need to add `bufferutil` and `utf-8-validate` to production deployment
 3. **Access Token Expiry** - Token expires in 1 hour, no refresh mechanism yet
    - Current workaround: Follow steps in `refresh-mcp-token.md` to get new token
    - Future improvement: Implement OAuth refresh token flow
@@ -211,6 +216,24 @@ GOOGLE_CLIENT_SECRET=<client-secret>
 
 ### October 24, 2025
 
+#### Late Night - WebSocket Native Module Fix
+- ✅ **Diagnosed WebSocket Issue** - Identified `[TypeError: bufferUtil.mask is not a function]` error
+  - Root cause: `bufferutil` native module not properly compiled
+  - WebSocket connections were timing out during authentication
+- ✅ **Fixed Native Dependencies**:
+  - Ran `npm rebuild bufferutil utf-8-validate`
+  - Installed `@types/ws` for TypeScript support
+  - Restarted dev server with rebuilt modules
+- ✅ **Verified Fix** - Successfully turned on `light.9_kitchen_shelf_lamp` via MCP
+  - WebSocket connection established ✅
+  - Authentication with HA successful ✅
+  - Service call executed correctly ✅
+- ✅ **Updated Documentation**:
+  - Added Step 1 to `HA_SETUP.md` for WebSocket dependency installation
+  - Created comprehensive troubleshooting section for native module errors
+  - Updated `README.md` with Home Assistant quick start
+  - Updated `PROJECT_STATUS.md` with resolution details
+
 #### Late Evening - Home Assistant Integration & Port Management
 - ✅ **Database Schema** - Added `HomeAssistantConfig` table with migration
 - ✅ **Encryption System** - Created AES-256-GCM encryption utilities for token storage
@@ -253,13 +276,15 @@ GOOGLE_CLIENT_SECRET=<client-secret>
 2. [✅] Complete OAuth flow for Cursor - DONE
 3. [✅] Restart Cursor and verify tools show up in UI - DONE (green, working!)
 4. [✅] Test calling `add_numbers` tool from Cursor - DONE (42 + 17 = 59)
-5. [✅] Implement Home Assistant integration - DONE (13 tools + UI)
+5. [✅] Implement Home Assistant integration - DONE (15 tools + UI)
 6. [✅] Refresh OAuth token (Oct 24, 2025) - DONE - Token expires in 1 hour
-7. [ ] **Add `HA_ENCRYPTION_KEY` to `.env.local`** - Required for HA integration
-8. [ ] Test HA tools with real Home Assistant instance
-9. [ ] Test complete OAuth flow on production (Vercel)
-10. [ ] Add `HA_ENCRYPTION_KEY` to Vercel environment variables
-11. [ ] Fix interactive test page button functionality
+7. [✅] Add `HA_ENCRYPTION_KEY` to `.env.local` - DONE
+8. [✅] Test HA tools with real Home Assistant instance - DONE (light.9_kitchen_shelf_lamp turned on!)
+9. [✅] Fix WebSocket native module error - DONE (`npm rebuild bufferutil utf-8-validate`)
+10. [✅] Update documentation with HA setup and troubleshooting - DONE
+11. [ ] Test complete OAuth flow on production (Vercel)
+12. [ ] Add `HA_ENCRYPTION_KEY` to Vercel environment variables
+13. [ ] Fix interactive test page button functionality
 
 ### Future Enhancements
 1. [ ] Test Claude Desktop integration

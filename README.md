@@ -48,13 +48,24 @@ Tell Inspector to connect to `https://example.com/mcp/mcp`, with Streamable HTTP
 
 ## Running the server
 
-```
+```bash
 npm install
+npm rebuild bufferutil utf-8-validate  # Build native WebSocket modules
 prisma generate
 npm run dev
 ```
 
 The very first time you will also need to run `prisma db push` to create the database tables.
+
+### Home Assistant Integration (Optional)
+
+This server includes full Home Assistant integration with 15+ MCP tools for controlling your smart home. See **[HA_SETUP.md](./HA_SETUP.md)** for complete setup instructions.
+
+**Quick Start:**
+1. Rebuild WebSocket native dependencies: `npm rebuild bufferutil utf-8-validate`
+2. Add `HA_ENCRYPTION_KEY` to your `.env.local` (see HA_SETUP.md)
+3. Sign in and configure your HA credentials at `/ha`
+4. Use MCP tools like `ha_turn_on`, `ha_get_states`, etc.
 
 ### Environment variables
 
