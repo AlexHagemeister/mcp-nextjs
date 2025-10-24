@@ -120,10 +120,29 @@ Update `PROJECT_STATUS.md` with findings.
 - Run `npx prisma generate` after changing DATABASE_URL
 - Migrations must be applied: `npx prisma migrate deploy`
 
-### Port Conflicts
-- Server might not start on expected port
-- Check what port actually started (look for "Local: http://localhost:XXXX")
-- Update MCP client configs to match actual port
+### Port Management - ALWAYS USE PORT 3000
+**Critical:** This project MUST run on port 3000. All OAuth redirects, MCP configs, and documentation assume port 3000.
+
+**If npm run dev says port 3000 is in use:**
+- This is almost always a previous dev server instance that should be killed
+- **DO NOT** let it start on port 3001 or any other port
+- **Kill the old process and restart:**
+
+```bash
+# Find and kill processes on port 3000 (and 3001 just in case)
+lsof -ti:3000 -ti:3001 | xargs kill -9
+
+# Then start fresh on port 3000
+npm run dev
+```
+
+**Why this matters:**
+- OAuth redirect URIs are registered for `http://localhost:3000`
+- Cursor MCP config points to `http://localhost:3000`
+- Switching ports will break authentication flow
+- All documentation and examples use port 3000
+
+**Never use `PORT=3001 npm run dev` - it will cause authentication failures.**
 
 ### OAuth Redirects
 - Redirect URIs must EXACTLY match what's registered
@@ -136,9 +155,9 @@ Update `PROJECT_STATUS.md` with findings.
 
 ### Development
 ```bash
-npm run dev          # Start dev server (default port 3000)
-PORT=3001 npm run dev  # Start on specific port
-npm run build        # Build for production
+npm run dev                                    # Start dev server (MUST be on port 3000)
+lsof -ti:3000 -ti:3001 | xargs kill -9       # Kill existing processes if port in use
+npm run build                                  # Build for production
 ```
 
 ### Database
@@ -223,4 +242,5 @@ git push origin main          # Push to GitHub
 5. **Ask questions** if something is unclear
 6. **Update status** even for small changes
 7. **Verify environment** before debugging (check .env.local, ports, etc.)
+8. **Always use port 3000** - kill any conflicting processes instead of switching ports
 

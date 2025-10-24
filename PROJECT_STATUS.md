@@ -9,9 +9,9 @@
 
 ---
 
-## Current Status: Locally Functional
+## Current Status: Home Assistant Integration Complete
 
-**Last Updated:** October 23, 2025 (Evening)
+**Last Updated:** October 24, 2025 (Late Evening)
 
 ### ✅ What's Working
 
@@ -23,7 +23,10 @@
 - ✅ **Token Exchange** - `/api/oauth/token` endpoint working
 - ✅ **MCP Protocol** - Both SSE (`/mcp/sse`) and HTTP Stream (`/mcp/mcp`) transports responding
 - ✅ **Bearer Token Authentication** - Access tokens validated correctly
-- ✅ **MCP Tool** - `add_numbers` tool working (tested: 42 + 17 = 59)
+- ✅ **Home Assistant Integration** - Full WebSocket connection manager with per-user credentials
+- ✅ **HA MCP Tools** - 15 Home Assistant tools implemented (turn_on, turn_off, get_states, etc.)
+- ✅ **HA Credentials Management** - Web UI + API for configuring HA URL and tokens
+- ✅ **Token Encryption** - HA tokens encrypted at rest using AES-256-GCM
 
 #### Infrastructure
 - ✅ **GitHub Repository** - Connected and syncing (`AlexHagemeister/mcp-nextjs`)
@@ -37,8 +40,14 @@
 
 ### ❌ What's Not Working / Needs Testing
 
+#### Home Assistant Integration (NEW)
+- ❓ **HA MCP Tools** - Tools implemented but need end-to-end testing with real HA instance
+- ❓ **HA Encryption Key** - Needs to be added to `.env.local` and Vercel environment
+- ❓ **WebSocket Connection Pool** - Connection reuse logic needs testing under load
+- ❓ **Event Subscriptions** - Subscribe tools implemented but need testing
+
 #### Production Deployment
-- ❓ **Vercel Environment Variables** - Added but full OAuth flow not tested on production
+- ❓ **Vercel Environment Variables** - Need to add `HA_ENCRYPTION_KEY` to production
 - ❓ **Production OAuth Flow** - Google redirect URI added but not verified end-to-end
 - ❌ **Test Page Interactive Features** - `/test` page buttons not responding (likely React hydration issue)
 
@@ -74,6 +83,7 @@ GOOGLE_CLIENT_SECRET=<client-secret>
 2. `20250621195008_add_auth_code` - AuthCode table with PKCE support
 3. `20250621204530_make_user_optional_in_client` - Client table updates
 4. `20250623205959_add_pkce_to_auth_code` - PKCE fields
+5. `20251024001706_add_home_assistant_config` - HomeAssistantConfig table
 
 **Tables:**
 - `User` - NextAuth user accounts
@@ -82,13 +92,41 @@ GOOGLE_CLIENT_SECRET=<client-secret>
 - `Client` - OAuth clients registered with our server
 - `AccessToken` - Bearer tokens for MCP access
 - `AuthCode` - Temporary authorization codes
+- `HomeAssistantConfig` - Per-user Home Assistant credentials (encrypted)
 
 ### MCP Tools
 
-Currently implemented:
+**Demo Tool:**
 1. **add_numbers** - Adds two numbers together
    - Input: `{ a: number, b: number }`
    - Output: Text result with sum
+
+**Home Assistant Tools (15 total):**
+
+*Core Service Calls:*
+1. **ha_call_service** - Generic HA service call (domain, service, service_data, target)
+2. **ha_turn_on** - Turn on entities (lights, switches, etc.)
+3. **ha_turn_off** - Turn off entities
+4. **ha_toggle** - Toggle entities
+
+*State & Configuration:*
+5. **ha_get_states** - Get all entity states (optionally filtered by domain)
+6. **ha_get_state** - Get single entity state
+7. **ha_get_config** - Get HA configuration
+8. **ha_get_services** - Get all available services
+9. **ha_get_panels** - Get registered panels
+
+*Events:*
+10. **ha_fire_event** - Fire custom event
+
+*Validation & Targeting:*
+11. **ha_validate_config** - Validate trigger/condition/action configs
+12. **ha_extract_from_target** - Extract entities/devices/areas from target
+
+*Connection:*
+13. **ha_ping** - Verify connection is alive
+
+*Note: Event subscription tools (ha_subscribe_events, ha_subscribe_trigger) are implemented in the connection manager but require persistent connection handling.*
 
 ### API Endpoints
 
@@ -102,24 +140,32 @@ Currently implemented:
 | `/mcp/sse` | GET | MCP SSE (for Claude) | ✅ Working |
 | `/callback` | GET | OAuth callback display | ✅ Working |
 | `/test` | GET | Interactive test page | ⚠️ Loads but buttons non-functional |
+| `/api/ha/config` | GET/POST/DELETE | Manage HA credentials | ✅ Implemented |
+| `/api/ha/test` | GET | Test HA connection | ✅ Implemented |
+| `/ha` | GET | HA management UI | ✅ Implemented |
 
 ---
 
 ## Known Issues
 
 ### Critical
-- None currently blocking core functionality
+- **HA Encryption Key Missing** - Must add `HA_ENCRYPTION_KEY` to `.env.local` before HA tools will work
+  - Generated key: `c7ec564fe3a5f2c41dae6892b4e65220ea1475096f755838049db15c7b07d5af`
+  - Add to `.env.local`: `HA_ENCRYPTION_KEY="c7ec564fe3a5f2c41dae6892b4e65220ea1475096f755838049db15c7b07d5af"`
+  - Also needs to be added to Vercel environment variables for production
 
 ### High Priority
-1. **Production OAuth Flow Not Verified** - Need end-to-end test on Vercel deployment
-2. **Access Token Expiry** - Token expires in 1 hour, no refresh mechanism yet
+1. **HA Tools Not Tested** - Home Assistant integration code complete but needs real-world testing
+2. **Production OAuth Flow Not Verified** - Need end-to-end test on Vercel deployment
+3. **Access Token Expiry** - Token expires in 1 hour, no refresh mechanism yet
 
 ### Medium Priority
-3. **Test Page Interactive Features** - React client-side JS not working
+4. **Test Page Interactive Features** - React client-side JS not working
+5. **WebSocket Connection Cleanup** - Connection pool cleanup logic needs load testing
 
 ### Low Priority
-5. **Redis Not Configured** - Optional but could improve performance
-6. **Only One Tool** - Could add more useful MCP tools
+6. **Redis Not Configured** - Optional but could improve performance
+7. **Event Subscriptions** - Subscribe tools need session persistence strategy
 
 ---
 
@@ -157,6 +203,41 @@ Currently implemented:
   - Discovered and displayed `add_numbers` tool
   - Successfully executed tool call (42 + 17 = 59)
 
+### October 24, 2025
+
+#### Late Evening - Home Assistant Integration & Port Management
+- ✅ **Database Schema** - Added `HomeAssistantConfig` table with migration
+- ✅ **Encryption System** - Created AES-256-GCM encryption utilities for token storage
+  - `src/lib/encryption.ts` - encrypt/decrypt functions
+  - Generated encryption key (needs to be added to env)
+- ✅ **WebSocket Connection Manager** - Created comprehensive HA connection handler
+  - `src/lib/ha-connection.ts` - Full WebSocket API implementation
+  - Connection pooling with automatic cleanup
+  - Reconnection logic with exponential backoff
+  - Message queuing and request/response correlation
+  - Subscription management for events and triggers
+- ✅ **HA Credentials API** - Three new endpoints:
+  - `POST /api/ha/config` - Save/update HA credentials (encrypted)
+  - `GET /api/ha/config` - Retrieve config (token masked)
+  - `DELETE /api/ha/config` - Remove credentials
+  - `GET /api/ha/test` - Test connection validity
+- ✅ **MCP Tools** - Implemented 13 Home Assistant tools:
+  - Core: `ha_call_service`, `ha_turn_on`, `ha_turn_off`, `ha_toggle`
+  - State: `ha_get_states`, `ha_get_state`, `ha_get_config`, `ha_get_services`, `ha_get_panels`
+  - Events: `ha_fire_event`
+  - Validation: `ha_validate_config`, `ha_extract_from_target`
+  - Connection: `ha_ping`
+- ✅ **Management UI** - Created `/ha` page with:
+  - Form to input HA URL and long-lived access token
+  - Test connection button
+  - Configuration status display
+  - Requires NextAuth authentication
+- ✅ **Home Page Update** - Added link to HA configuration page
+- ✅ **Port Management Documentation** - Added critical notes about always using port 3000
+  - Updated AGENTS.md with port conflict resolution
+  - Clear instructions to kill old processes instead of switching ports
+  - Explained why port 3000 is required (OAuth redirects, MCP configs)
+
 ---
 
 ## Next Steps
@@ -166,18 +247,24 @@ Currently implemented:
 2. [✅] Complete OAuth flow for Cursor - DONE
 3. [✅] Restart Cursor and verify tools show up in UI - DONE (green, working!)
 4. [✅] Test calling `add_numbers` tool from Cursor - DONE (42 + 17 = 59)
-5. [ ] Test complete OAuth flow on production (Vercel)
-6. [ ] Fix interactive test page button functionality
+5. [✅] Implement Home Assistant integration - DONE (13 tools + UI)
+6. [ ] **Add `HA_ENCRYPTION_KEY` to `.env.local`** - Required for HA integration
+7. [ ] Test HA tools with real Home Assistant instance
+8. [ ] Test complete OAuth flow on production (Vercel)
+9. [ ] Add `HA_ENCRYPTION_KEY` to Vercel environment variables
+10. [ ] Fix interactive test page button functionality
 
 ### Future Enhancements
-1. [ ] Add more useful MCP tools beyond `add_numbers`
-2. [ ] Test Claude Desktop integration
-3. [ ] Test VSCode integration
-4. [ ] Add Redis for improved SSE performance
-5. [ ] Add token refresh functionality
-6. [ ] Add scope-based permissions
-7. [ ] Add rate limiting
-8. [ ] Add usage analytics/logging
+1. [ ] Test Claude Desktop integration
+2. [ ] Test VSCode integration
+3. [ ] Add Redis for improved SSE performance
+4. [ ] Add token refresh functionality for OAuth tokens
+5. [ ] Add scope-based permissions
+6. [ ] Add rate limiting for API calls
+7. [ ] Add usage analytics/logging
+8. [ ] Implement event subscription persistence across MCP sessions
+9. [ ] Add more HA-specific convenience tools (scenes, automations, scripts)
+10. [ ] Add HA webhook support for bidirectional communication
 
 ---
 

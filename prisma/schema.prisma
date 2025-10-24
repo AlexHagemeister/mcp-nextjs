@@ -19,6 +19,7 @@ model User {
   clients       Client[]
   accessTokens  AccessToken[]
   authCodes     AuthCode[]
+  haConfig      HomeAssistantConfig?
 }
 
 model Account {
@@ -96,4 +97,14 @@ model AuthCode {
   codeChallengeMethod String?
 
   createdAt DateTime @default(now())
+}
+
+model HomeAssistantConfig {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  haUrl     String
+  haToken   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
